@@ -1,0 +1,34 @@
+import time
+import etsy_api
+import twitter_post
+import instagram_post
+
+# Etsy API credentials
+ETSY_API_KEY = "your_api_key"
+ETSY_API_SECRET = "your_api_secret"
+ETSY_ACCESS_TOKEN = "your_access_token"
+ETSY_ACCESS_TOKEN_SECRET = "your_access_token_secret"
+
+# create an instance of the Etsy API client
+etsy = etsy_api.EtsyAPI(ETSY_API_KEY, ETSY_API_SECRET, ETSY_ACCESS_TOKEN, ETSY_ACCESS_TOKEN_SECRET)
+
+# get the last listing ID processed
+with open("last_listing_id.txt", "r") as f:
+    last_listing_id = f.read().strip()
+
+# get the latest listing ID from the Etsy API
+latest_listing = etsy.get_latest_listing()
+latest_listing_id = latest_listing["listing_id"]
+
+# check if there is a new listing
+if latest_listing_id != last_listing_id:
+    # there is a new listing, post to Twitter and Instagram
+    twitter_post.post_to_twitter(latest_listing)
+    instagram_post.post_to_instagram(latest_listing)
+
+    # update the last listing ID
+    with open("last_listing_id.txt", "w") as f:
+        f.write(str(latest_listing_id))
+
+# wait for 10 seconds before checking again
+time.sleep(10)
