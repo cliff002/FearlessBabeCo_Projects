@@ -1,0 +1,18 @@
+import tweepy
+import time
+
+# Authenticate to Twitter
+auth = tweepy.OAuthHandler("consumer_key", "consumer_secret")
+auth.set_access_token("access_token", "access_token_secret")
+
+# Create API object
+api = tweepy.API(auth)
+
+# Get the last 20 tweets from the authenticated user's timeline
+tweets = api.user_timeline(count=20)
+
+# Loop through each tweet and delete it with a delay of 10 seconds between each deletion
+for tweet in tweets:
+    api.destroy_status(tweet.id)
+    print(f"Tweet {tweet.id} deleted.")
+    time.sleep(10)
