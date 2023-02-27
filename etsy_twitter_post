@@ -1,0 +1,42 @@
+import random
+import requests
+import tweepy
+import time
+
+# Etsy API parameters
+ETSY_API_KEY = "etsy_key"
+ETSY_SHOP_NAME = "FearlessBabeCo"
+ETSY_API_URL = f"https://api.etsy.com/v3/application/shops/{ETSY_SHOP_NAME}/listings/active"
+
+# Authenticate with Twitter API
+auth = tweepy.OAuthHandler(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET)
+auth.set_access_token(TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET)
+api = tweepy.API(auth)
+
+while True:
+    # Query the Etsy API v3 for a list of active listings
+    headers = {
+        "x-api-key": ETSY_API_KEY,
+        "accept": "application/json"
+    }
+    params = {
+        "includes": "MainImage",
+        "limit": "100"
+    }
+    response = requests.get(ETSY_API_URL, headers=headers, params=params)
+    data = response.json()["data"]
+
+    # Select a random item from the list
+    item = random.choice(data)
+    title = item["title"]
+    url = item["url"]
+    image_url = item["MainImage"]["url_fullxfull"]
+
+    # Post a new tweet with the selected item
+    message = f"Check out this item from {ETSY_SHOP_NAME}:\n{title}\n{url}"
+    image = requests.get(image_url).content
+    media = api.media_upload("item.jpg", file=image)
+    api.update_status(status=message, media_ids=[media.media_id])
+
+    # Wait for 3 minutes before repeating the process
+    time.sleep(18000)
